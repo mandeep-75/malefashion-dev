@@ -21,6 +21,15 @@
 
   --color-surface: #f5f5f5;
   --color-surface-2: #f2f2f2;
+
+  /*
+    Mid greys for words that sit on top of a photograph. Both clear 4.5:1 on
+    white, so each stays readable over the light and the dark parts of a frame.
+    Two steps only, chosen per hero slide — enough variety without turning the
+    copy into a different colour every render.
+  */
+  --color-legible: #737373;
+  --color-legible-2: #5f6368;
   --color-hairline: #ebebeb;
   --color-hairline-2: #e1e1e1;
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import FloatingCartButton from "./components/FloatingCartButton";
 import SearchModal from "./components/SearchModal";
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
@@ -43,6 +44,8 @@ export default function App() {
 
       <Footer />
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
+      {/* Hidden while search is open, so it never sits above the modal. */}
+      <FloatingCartButton hidden={searchOpen} />
     </div>
   );
 }
