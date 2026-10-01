@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Heart, Camera } from "lucide-react";
+import { INSTAGRAM_URL } from "../lib/brand";
 
 // Resolved once at module load, not on every render.
 const COPYRIGHT_YEAR = new Date().getFullYear();
@@ -12,14 +13,11 @@ const SHOPPING_LINKS = [
 
 const HELP_LINKS = [
   { to: "/contact", label: "Contact Us" },
+  { to: "/orders", label: "My Orders & Invoices" },
   { to: "/checkout", label: "Payment Methods" },
   { to: "/shop", label: "Delivery" },
   { to: "/returns", label: "Return & Exchanges" },
 ];
-
-// Lucide carries no brand marks, so the social link is a wordmark in the
-// footer bar rather than a plain text row buried under the logo.
-const INSTAGRAM_URL = "https://www.instagram.com/aurex.co.inn/";
 
 export default function Footer() {
   return (
@@ -82,7 +80,8 @@ export default function Footer() {
         <div className="container flex flex-col items-center gap-6 py-6 sm:flex-row sm:justify-between">
           {/* The only social link on the site, so it gets the whole left of the
               footer bar as a standalone mark rather than sitting in a list under
-              the logo where it read as another footer link. */}
+              the logo where it read as another footer link. Lucide carries no
+              brand marks, hence the wordmark. */}
           <a
             href={INSTAGRAM_URL}
             target="_blank"

@@ -18,3 +18,12 @@ export const formatPrice = (paise) => `₹${groupIndian(paise / 100)}`;
 
 /** 899900 -> "8,999" (no symbol, for input fields) */
 export const formatAmount = (paise) => groupIndian(paise / 100);
+
+/**
+ * 899900 -> "Rs. 8,999"
+ *
+ * For the PDF invoice only. The base-14 PDF fonts have no glyph for the rupee
+ * sign, so it would render as a missing-glyph box; this is the same figure
+ * written out in a way every PDF reader can draw.
+ */
+export const formatPricePdf = (paise) => `Rs. ${groupIndian(paise / 100)}`;

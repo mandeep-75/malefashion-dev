@@ -41,3 +41,6 @@ Thumbs.db
 .env.local
 .env.*.local
 .vercel
+
+# Security audit scratch (test harness, evidence). Never committed.
+.security-audit/

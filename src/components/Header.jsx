@@ -13,6 +13,7 @@ const PAGES = [
   { to: "/about", label: "About Us" },
   { to: "/cart", label: "Shopping Cart" },
   { to: "/checkout", label: "Check Out" },
+  { to: "/orders", label: "My Orders" },
 ];
 
 function CartLink({ onNavigate, className = "" }) {
