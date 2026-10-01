@@ -9,6 +9,30 @@ export const BUSINESS_NAME = "Male Fashion";
 export const INSTAGRAM_URL = "https://www.instagram.com/aurex.co.inn/";
 
 /**
+ * The address buyers are told to contact. Shown on the order confirmation and
+ * the invoice.
+ *
+ * Read from the build-time env, like the WhatsApp number, so it can be changed
+ * without a code edit. Also public by design.
+ */
+const RAW_EMAIL = import.meta.env.VITE_CONTACT_EMAIL ?? "";
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+/** "" when unset or malformed, so callers never render a dead mailto: link. */
+export const CONTACT_EMAIL = EMAIL_PATTERN.test(RAW_EMAIL.trim()) ? RAW_EMAIL.trim() : "";
+export const hasEmail = CONTACT_EMAIL !== "";
+
+/** A `mailto:` link with an optional prefilled subject and body. */
+export function emailUrl({ subject = "", body = "" } = {}) {
+  if (!hasEmail) return "";
+  const query = [subject && `subject=${encodeURIComponent(subject)}`, body && `body=${encodeURIComponent(body)}`]
+    .filter(Boolean)
+    .join("&");
+  return `mailto:${CONTACT_EMAIL}${query ? `?${query}` : ""}`;
+}
+
+/**
  * WhatsApp number in E.164 digits with no `+`, e.g. `919876543210`.
  *
  * Read from the build-time env so the number can be changed without touching

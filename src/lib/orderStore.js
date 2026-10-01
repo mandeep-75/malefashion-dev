@@ -66,9 +66,6 @@ export function saveOrder(order) {
 export function buildOrder({ payment, result, lines, shipping, form }) {
   const subtotal = lines.reduce((sum, line) => sum + line.lineTotal, 0);
   const amount = result.amount ?? payment.amount ?? subtotal + shipping;
-  // The server reports what was refunded. Net of refunds is what was actually
-  // kept, which is the figure that belongs on a receipt.
-  const amountRefunded = Math.max(0, result.amountRefunded ?? 0);
 
   return {
     id: payment.paymentId,
@@ -77,7 +74,6 @@ export function buildOrder({ payment, result, lines, shipping, form }) {
     status: result.status,
     currency: result.currency ?? CURRENCY,
     amount,
-    amountRefunded,
     placedAt: new Date().toISOString(),
     items: lines.map((line) => ({
       id: line.id,
@@ -106,9 +102,3 @@ export function buildOrder({ payment, result, lines, shipping, form }) {
 /** "3 items" / "1 item", for the orders list. */
 export const itemCount = (order) =>
   (order?.items ?? []).reduce((sum, item) => sum + (item.qty ?? 0), 0);
-
-/** What the shopper actually paid, net of any refund. */
-export const netPaid = (order) =>
-  Math.max(0, (order?.amount ?? 0) - (order?.amountRefunded ?? 0));
-
-export const isRefunded = (order) => (order?.amountRefunded ?? 0) > 0;

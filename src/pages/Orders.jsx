@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Camera, Download, MessageCircle, ReceiptText } from "lucide-react";
+import { ArrowRight, Camera, Download, Mail, MessageCircle, ReceiptText } from "lucide-react";
 import Breadcrumb from "../components/Breadcrumb";
 import { formatPrice } from "../lib/money";
 import { downloadInvoice } from "../lib/invoice";
-import { isRefunded, itemCount, netPaid, readOrders } from "../lib/orderStore";
-import { FULFILMENT_WINDOW, INSTAGRAM_URL, hasWhatsApp, whatsappUrl } from "../lib/brand";
+import { itemCount, readOrders } from "../lib/orderStore";
+import { FULFILMENT_WINDOW, INSTAGRAM_URL, hasEmail, hasWhatsApp, emailUrl, whatsappUrl } from "../lib/brand";
 
 const dateLabel = (iso) => {
   const date = new Date(iso);
@@ -15,7 +15,6 @@ const dateLabel = (iso) => {
 function OrderCard({ order }) {
   const [open, setOpen] = useState(false);
   const units = itemCount(order);
-  const refunded = isRefunded(order);
 
   return (
     <li className="border border-hairline">
@@ -25,15 +24,10 @@ function OrderCard({ order }) {
           <p className="mt-1 text-sm text-body">
             {dateLabel(order.placedAt)} &middot; {units} item{units === 1 ? "" : "s"}
           </p>
-          {refunded && (
-            <p className="mt-2 inline-block bg-surface px-2.5 py-1 text-xs font-semibold text-body">
-              {formatPrice(order.amountRefunded)} refunded
-            </p>
-          )}
         </div>
 
         <div className="text-right">
-          <p className="text-lg font-bold text-ink">{formatPrice(netPaid(order))}</p>
+          <p className="text-lg font-bold text-ink">{formatPrice(order.amount)}</p>
           <p className="mt-0.5 text-xs tracking-wider text-body uppercase">{order.status}</p>
         </div>
       </div>
@@ -153,8 +147,17 @@ export default function Orders() {
                     rel="noreferrer"
                     className="inline-flex items-center gap-2 border border-hairline-2 px-5 py-2.5 text-[13px] font-bold tracking-wider text-ink uppercase transition-colors hover:border-primary hover:text-primary"
                   >
-                    <MessageCircle size={15} aria-hidden="true" />
-                    Message on WhatsApp
+                <MessageCircle size={15} aria-hidden="true" />
+                  Message on WhatsApp
+                  </a>
+                )}
+                {hasEmail && (
+                  <a
+                    href={emailUrl({ subject: "My order" })}
+                    className="inline-flex items-center gap-2 border border-hairline-2 px-5 py-2.5 text-[13px] font-bold tracking-wider text-ink uppercase transition-colors hover:border-primary hover:text-primary"
+                  >
+                    <Mail size={15} aria-hidden="true" />
+                    Email us
                   </a>
                 )}
                 <a

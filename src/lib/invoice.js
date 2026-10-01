@@ -14,12 +14,13 @@ import { formatPricePdf } from "./money";
 import { measureText, PDF_CONTENT_WIDTH, PDF_MARGIN, PDF_PAGE, PdfDocument } from "./pdf";
 import {
   BUSINESS_NAME,
+  CONTACT_EMAIL,
   FULFILMENT_WINDOW,
   INSTAGRAM_URL,
   WHATSAPP_DISPLAY,
+  hasEmail,
   hasWhatsApp,
 } from "./brand";
-import { isRefunded, netPaid } from "./orderStore";
 
 const BRAND = [0.898, 0.212, 0.216]; // #e53637
 const INK = [0.067, 0.067, 0.067];
@@ -42,6 +43,23 @@ const COLUMNS = {
   qty: { x: PDF_MARGIN + 280, width: 34 },
   unit: { x: PDF_MARGIN + 322, width: 78 },
   amount: { x: PDF_MARGIN + 404, width: 97 },
+};
+
+/** The channels a buyer can reach us on, in the order we want them quoted. */
+const contactChannels = () => {
+  const channels = [];
+  if (hasWhatsApp) channels.push(`WhatsApp (${WHATSAPP_DISPLAY})`);
+  if (hasEmail) channels.push(CONTACT_EMAIL);
+  channels.push("Instagram");
+  return channels.length > 1 ? `${channels.slice(0, -1).join(", ")} or ${channels.at(-1)}` : channels[0];
+};
+
+/** Contact line in the page footer, built from whichever channels are configured. */
+const footerLine = () => {
+  const parts = [BUSINESS_NAME, `Instagram ${INSTAGRAM_URL.replace(/^https?:\/\/(www\.)?/, "")}`];
+  if (hasWhatsApp) parts.push(`WhatsApp ${WHATSAPP_DISPLAY}`);
+  if (hasEmail) parts.push(CONTACT_EMAIL);
+  return parts.join(" \u00b7 ");
 };
 
 const TOTALS_WIDTH = 190;
@@ -88,7 +106,6 @@ function totalRow(doc, label, value, { bold = false, size = 10, color = INK } = 
 export function buildInvoice(order) {
   const doc = new PdfDocument({ title: `Invoice ${order.orderId ?? ""}` });
   const customer = order.customer ?? {};
-  const refunded = isRefunded(order);
   const name = [customer.firstName, customer.lastName].filter(Boolean).join(" ") || "Customer";
 
   // Header: wordmark on the left, document title on the right.
@@ -137,8 +154,7 @@ export function buildInvoice(order) {
   totalRow(doc, "Subtotal", formatPricePdf(order.totals.subtotal));
   totalRow(doc, "Shipping", order.totals.shipping === 0 ? "Free" : formatPricePdf(order.totals.shipping));
   totalRow(doc, "Total", formatPricePdf(order.totals.total), { bold: true, size: 11 });
-  if (refunded) totalRow(doc, "Refunded", `-${formatPricePdf(order.amountRefunded)}`, { color: BODY });
-  totalRow(doc, refunded ? "Amount retained" : "Amount paid", formatPricePdf(netPaid(order)), {
+  totalRow(doc, "Amount paid", formatPricePdf(order.amount), {
     bold: true,
     size: 12,
     color: BRAND,
@@ -166,8 +182,8 @@ export function buildInvoice(order) {
   doc.moveDown(10);
   doc.paragraph(
     `What happens next: we have your order and payment. Our team confirms on ${
-      hasWhatsApp ? `WhatsApp (${WHATSAPP_DISPLAY})` : "WhatsApp"
-    } or Instagram within ${FULFILMENT_WINDOW} and dispatches it to the address above.`,
+      contactChannels()
+    } within ${FULFILMENT_WINDOW} and dispatches it to the address above.`,
     { size: 9, color: BODY, maxLines: 4 },
   );
 
@@ -179,10 +195,7 @@ export function buildInvoice(order) {
     overlay.cursorY = PAGE_BOTTOM - 22;
     overlay.rule({ color: HAIRLINE, weight: 0.6 });
     overlay.moveDown(6);
-    overlay.text(
-      `${BUSINESS_NAME} - Instagram ${INSTAGRAM_URL.replace(/^https?:\/\/(www\.)?/, "")}`,
-      { size: 8.5, color: BODY },
-    );
+    overlay.text(footerLine(), { size: 8.5, color: BODY });
     return overlay.ops;
   });
 

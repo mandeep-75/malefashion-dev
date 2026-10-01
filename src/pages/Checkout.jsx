@@ -11,6 +11,7 @@ import {
   Download,
   MessageCircle,
   Camera,
+  Mail,
   ReceiptText,
 } from "lucide-react";
 import Breadcrumb from "../components/Breadcrumb";
@@ -20,11 +21,13 @@ import { shippingFor } from "../lib/orders";
 import { startCheckout, confirmPayment } from "../lib/razorpay";
 import { ShippingError, normaliseShipping } from "../lib/shipping";
 import { downloadInvoice } from "../lib/invoice";
-import { buildOrder, isRefunded, netPaid, saveOrder } from "../lib/orderStore";
+import { buildOrder, saveOrder } from "../lib/orderStore";
 import {
   FULFILMENT_WINDOW,
   INSTAGRAM_URL,
+  hasEmail,
   hasWhatsApp,
+  emailUrl,
   whatsappUrl,
 } from "../lib/brand";
 
@@ -158,10 +161,13 @@ export default function Checkout() {
   }, [receipt]);
 
   if (receipt) {
-    const refunded = isRefunded(receipt);
     const whatsapp = whatsappUrl(
       `Hi, I have placed order ${receipt.orderId} and I have a question about it.`,
     );
+    const email = emailUrl({
+      subject: `Order ${receipt.orderId}`,
+      body: `Hi,\n\nI have a question about order ${receipt.orderId}.\n\n`,
+    });
 
     return (
       <>
@@ -187,16 +193,8 @@ export default function Checkout() {
               </div>
               <div className="flex justify-between gap-4">
                 <dt className="text-body">Amount paid</dt>
-                <dd className="font-semibold text-ink">{formatPrice(netPaid(receipt))}</dd>
+                <dd className="font-semibold text-ink">{formatPrice(receipt.amount)}</dd>
               </div>
-              {refunded && (
-                <div className="flex justify-between gap-4">
-                  <dt className="text-body">Refunded</dt>
-                  <dd className="font-semibold text-body">
-                    &minus;{formatPrice(receipt.amountRefunded)}
-                  </dd>
-                </div>
-              )}
             </dl>
 
             <div className="mt-8 border border-hairline p-6 text-left">
@@ -230,6 +228,35 @@ export default function Checkout() {
                 within <strong className="font-semibold text-ink">{FULFILMENT_WINDOW}</strong> to
                 confirm your order and send it out. Quote order {receipt.orderId} if you message us
                 about anything.
+              </p>
+
+              <div className="mt-5 flex flex-wrap gap-3">
+                {hasWhatsApp && (
+                  <a
+                    href={whatsapp}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 border border-hairline-2 px-4 py-2 text-[13px] font-bold tracking-wider text-ink uppercase transition-colors hover:border-primary hover:text-primary"
+                  >
+                    <MessageCircle size={14} aria-hidden="true" />
+                    WhatsApp us
+                  </a>
+                )}
+                {hasEmail && (
+                  <a
+                    href={email}
+                    className="inline-flex items-center gap-2 border border-hairline-2 px-4 py-2 text-[13px] font-bold tracking-wider text-ink uppercase transition-colors hover:border-primary hover:text-primary"
+                  >
+                    <Mail size={14} aria-hidden="true" />
+                    Email us
+                  </a>
+                )}
+              </div>
+
+              <p className="mt-4 text-xs text-body">
+                Your email is on this order:{" "}
+                <span className="font-semibold text-ink">{form.email}</span>. We only use it for
+                this order.
               </p>
             </div>
 
