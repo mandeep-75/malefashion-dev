@@ -8,15 +8,15 @@ import { CATEGORIES, productsInCategory } from "../data/products";
 const HERO_SLIDES = [
   {
     image: "/img/hero/hero-1.jpg",
-    kicker: "Summer Collection",
-    title: "Fall - Winter Collections 2030",
-    copy: "A specialist label creating luxury essentials. Ethically crafted with an unwavering commitment to exceptional quality.",
+    kicker: "THE NEW SEASON",
+    title: "Timeless Style. Modern Essentials.",
+    copy: "Thoughtfully designed menswear made for every season, every occasion, and every day.",
   },
   {
     image: "/img/hero/hero-2.jpg",
     kicker: "New Arrivals",
-    title: "The Layering Edit",
-    copy: "Cropped cross-graphic knits, cut boxy with long sleeves and ribbed trim. Five colourways, one silhouette.",
+    title: "Made for Modern Men.",
+    copy: "Clean silhouettes, premium details and timeless pieces built for everyday life.",
   },
 ];
 
@@ -123,7 +123,7 @@ function Hero() {
                 to="/shop"
                 className="primary-btn inline-flex items-center gap-2.5 tracking-[2px]"
               >
-                Shop now
+                EXPLORE COLLECTION
                 <ArrowRight size={20} aria-hidden="true" />
               </Link>
             </div>
