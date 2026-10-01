@@ -64,7 +64,7 @@ src/
   pages/            one file per route
 public/             static assets served at the web root (img/, favicon.svg)
 api/                Vercel functions: create-order, verify-payment
-server/             server-only Razorpay helpers (never import from src/)
+server/             server-only Razorpay + rate-limit helpers (never import from src/)
 vercel.json         SPA rewrite so deep links do not 404
 ```
 
@@ -93,6 +93,13 @@ To enable it, copy `.env.example` to `.env.local` and fill in `RAZORPAY_KEY_ID` 
 `RAZORPAY_KEY_SECRET`. `RAZORPAY_KEY_SECRET` is read only in `server/razorpay.js` —
 never set it as a `VITE_` variable, because those are inlined into the public bundle.
 Set the same two variables in the Vercel dashboard for production.
+
+Both order endpoints are **unauthenticated by necessity** — a shopper with no account
+must be able to start a payment — so `server/rateLimit.js` puts a per-IP budget on
+them, and `src/lib/orders.js` caps a single order at `MAX_ORDER_TOTAL`. The in-process
+limiter is not a global ceiling on Vercel; add a Vercel Firewall rate limit rule for
+`/api/*` before taking real volume. `PRODUCTION-TODO.md` section 7 has the command and
+the reasoning.
 
 ## State
 

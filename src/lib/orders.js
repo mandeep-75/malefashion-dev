@@ -17,6 +17,19 @@ export const CURRENCY = "INR";
 export const MAX_LINES = 50;
 export const MAX_QTY_PER_LINE = 99;
 
+/**
+ * Ceiling on what a single order may be worth, in paise (₹50,000).
+ *
+ * Chosen by the shop owner. At ~₹650–700 a tee this is roughly 70 units, so an
+ * ordinary single shopper never reaches it, while 50 lines × 99 units — the most
+ * the other guards allow — is far out of reach. Anything past this is a bulk
+ * enquiry to handle by hand, and the error says so.
+ *
+ * Rate limiting bounds how often an order can be created; this bounds what each
+ * one can be for. Both are needed, and neither replaces the other.
+ */
+export const MAX_ORDER_TOTAL = 5000000;
+
 export function shippingFor(subtotal) {
   if (subtotal <= 0) return 0;
   return subtotal >= FREE_SHIPPING_OVER ? 0 : SHIPPING_FEE;
@@ -75,5 +88,16 @@ export function priceLines(lines, getProduct) {
     });
   }
 
-  return { lines: priced, ...totalsFor(subtotal) };
+  const totals = totalsFor(subtotal);
+  if (totals.total > MAX_ORDER_TOTAL) {
+    // Reported in rupees because that is the unit a shopper reads, and the
+    // source of the number is a catalogue the merchant can change.
+    throw new Error(
+      `Order total of Rs.${(totals.total / 100).toLocaleString("en-IN")} is over the Rs.${(
+        MAX_ORDER_TOTAL / 100
+      ).toLocaleString("en-IN")} limit. Please contact us for a bulk order.`,
+    );
+  }
+
+  return { lines: priced, ...totals };
 }

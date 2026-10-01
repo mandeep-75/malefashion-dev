@@ -17,6 +17,7 @@
  * 400:  { error }   missing or malformed fields
  * 401:  { error }   signature mismatch, or the payment belongs to another order
  * 405:  { error }   not POST
+ * 429:  { error }   too many verifications from this IP (see server/rateLimit.js)
  * 500:  { error }   Razorpay keys missing or malformed
  * 502:  { error }   Razorpay unreachable
  * 504:  { error }   Razorpay did not answer in time
@@ -31,11 +32,12 @@ import {
   readCredentials,
   verifyPaymentSignature,
 } from "../server/razorpay.js";
+import { take } from "../server/rateLimit.js";
 
-const json = (status, body) =>
+const json = (status, body, extraHeaders = {}) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+    headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...extraHeaders },
   });
 
 /** Razorpay identifiers are 14 alphanumeric characters with a known prefix. */
@@ -44,6 +46,22 @@ const ID_PATTERN = /^(order|pay)_[A-Za-z0-9]+$/;
 export async function verifyPaymentHandler(request) {
   if (request.method !== "POST") {
     return json(405, { error: "Use POST" });
+  }
+
+  // Placed before the signature check on purpose. An attacker probing ids gets
+  // no more upstream lookups per minute than a real shopper, and a shopper
+  // retrying after a dropped connection still has room to succeed.
+  const limit = take("verifyPayment", request);
+  if (!limit.allowed) {
+    console.warn("[verify-payment] rate limited", {
+      ip: request.headers.get("x-forwarded-for"),
+      retryAfterSeconds: limit.retryAfterSeconds,
+    });
+    return json(
+      429,
+      { error: "Too many verification attempts. Please wait a moment before retrying." },
+      { "Retry-After": String(limit.retryAfterSeconds) },
+    );
   }
 
   let body;

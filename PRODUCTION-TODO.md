@@ -19,8 +19,13 @@ Checkout is wired to Razorpay Standard Checkout via a serverless Orders API:
   asks Razorpay for the order's real status. Only `paid` counts as paid; an
   `authorized` (uncaptured) order does not.
 - `server/razorpay.js` — the only place `RAZORPAY_KEY_SECRET` is read.
+- `server/rateLimit.js` — per-IP request budget for both order endpoints, so an
+  anonymous caller cannot flood the merchant dashboard. **In-process only**: on
+  Vercel each invocation may get a fresh instance, so this bounds casual abuse but
+  is not a hard global ceiling. See section 7.
 - `src/lib/orders.js` — the shipping/total maths, shared by browser and server so
-  both agree on the figure.
+  both agree on the figure. Also holds `MAX_ORDER_TOTAL` (₹50,000), which the
+  server enforces before creating anything at Razorpay.
 - `src/lib/shipping.js` — the delivery-address validator, imported by **both** the
   checkout form and `api/create-order.js`, so there is one definition of a valid
   address. The server re-validates; the browser check is a convenience, not the
@@ -114,6 +119,41 @@ Razorpay ──→  POST /api/webhook        (independent of the browser)
 Deliberately **not** in scope yet: accounts and auth, an admin dashboard, invoicing,
 subscriptions, and a customer-facing order history. Each needs the stored orders
 first.
+
+## 7. Rate limiting is per-instance, not enforced at the edge
+
+`server/rateLimit.js` gives `/api/create-order` and `/api/verify-payment` a per-IP
+budget (10/min and 30/min). It works and it is dependency-free, but the buckets
+live in a module-level `Map` in a serverless runtime. Two consequences:
+
+- A Vercel invocation may run in a **fresh, short-lived instance**, so a flood
+  spreads across instances and the effective global limit is
+  `10 × (number of instances)`. The bucket is not a hard ceiling.
+- `x-forwarded-for` is the only client address a Web `Request` exposes, and it is
+  caller-controlled. A determined attacker can send their own header and get a new
+  bucket per request. The left-most entry is used, which is the correct convention,
+  but it is not authenticated.
+
+**Add the edge rule before taking real volume.** In the Vercel dashboard, or:
+
+```
+vercel firewall rules add --condition 'req.url.path == "/api/create-order"' \
+  --action rate_limit --rate-limit-requests 10 --rate-limit-window 60 \
+  --rate-limit-keys ip
+vercel firewall publish
+```
+
+This is enforced at the edge, keyed on the connection Vercel actually sees, and
+holds across every region and instance. `npx vercel firewall overview` currently
+reports **Firewall: Not configured** for this project, so nothing is live yet.
+
+Keep the in-process limiter after adding the edge rule. It costs nothing, it keeps
+`vercel dev` and any future non-Vercel host limited, and it fails safe if the
+firewall rule is ever unpublished by accident.
+
+The related value ceiling is **not** subject to any of this: `MAX_ORDER_TOTAL` is
+computed in `src/lib/orders.js` and enforced in `api/create-order.js` before
+Razorpay is called, so it holds for every request no matter where it runs.
 
 ## 2. No backend for any form
 

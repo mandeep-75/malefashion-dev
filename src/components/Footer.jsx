@@ -97,17 +97,6 @@ export default function Footer() {
             Copyright © {COPYRIGHT_YEAR} Male Fashion. All rights reserved
             <Heart size={14} className="ml-1 inline align-text-bottom text-primary" aria-hidden="true" />
           </p>
-          <p className="mt-2 text-xs text-white/45">
-            Managed by{" "}
-            <a
-              href="https://github.com/mandeep-75"
-              target="_blank"
-              rel="noreferrer"
-              className="font-semibold text-white/60 underline-offset-4 transition-colors hover:text-primary hover:underline"
-            >
-              github.com/mandeep-75
-            </a>
-            </p>
           </div>
         </div>
       </div>

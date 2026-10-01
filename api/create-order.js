@@ -13,6 +13,7 @@
  * 400:  { error }   empty/unknown cart, bad delivery details, or Razorpay
  *                   rejected the request
  * 405:  { error }   not POST
+ * 429:  { error }   too many orders from this IP (see server/rateLimit.js)
  * 500:  { error }   Razorpay keys missing or malformed
  * 502:  { error }   Razorpay unreachable
  * 504:  { error }   Razorpay did not answer in time
@@ -28,14 +29,18 @@ import {
   createOrder,
   readCredentials,
 } from "../server/razorpay.js";
+import { take } from "../server/rateLimit.js";
 import { getProduct } from "../src/data/products.js";
 import { CURRENCY, priceLines } from "../src/lib/orders.js";
 import { ShippingError, formatAddressLine, normaliseShipping } from "../src/lib/shipping.js";
 
-const json = (status, body) => {
+const json = (status, body, extraHeaders = {}) => {
   // Vercel runs each invocation in a fresh runtime; a CDN must never cache this.
   const headers = { "Content-Type": "application/json", "Cache-Control": "no-store" };
-  return new Response(JSON.stringify(body), { status, headers });
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...headers, ...extraHeaders },
+  });
 };
 
 /**
@@ -76,6 +81,21 @@ function respondToRazorpayError(error, log) {
 export async function createOrderHandler(request) {
   if (request.method !== "POST") {
     return json(405, { error: "Use POST" });
+  }
+
+  // Before any body parsing or Razorpay call: a rejected request must cost the
+  // caller nothing, so an over-limit loop never reaches the order API at all.
+  const limit = take("createOrder", request);
+  if (!limit.allowed) {
+    console.warn("[create-order] rate limited", {
+      ip: request.headers.get("x-forwarded-for"),
+      retryAfterSeconds: limit.retryAfterSeconds,
+    });
+    return json(
+      429,
+      { error: "Too many payment attempts. Please wait a moment and try again." },
+      { "Retry-After": String(limit.retryAfterSeconds) },
+    );
   }
 
   let payload;
