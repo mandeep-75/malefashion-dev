@@ -5,15 +5,23 @@ import ProductCard from "../components/ProductCard";
 import { CATEGORIES, productsInCategory } from "../data/products";
 
 
+/**
+ * Hero copy sits directly on the photo, so the colour has to survive both the
+ * light and the dark parts of the frame. Each slide picks its own mid-grey
+ * once, here, rather than a runtime random() that would re-shuffle text colour
+ * on every re-render and read as a bug.
+ */
 const HERO_SLIDES = [
   {
     image: "/img/hero/hero-1.jpg",
+    tone: "text-legible",
     kicker: "THE NEW SEASON",
     title: "Timeless Style. Modern Essentials.",
     copy: "Thoughtfully designed menswear made for every season, every occasion, and every day.",
   },
   {
     image: "/img/hero/hero-2.jpg",
+    tone: "text-legible-2",
     kicker: "New Arrivals",
     title: "Made for Modern Men.",
     copy: "Clean silhouettes, premium details and timeless pieces built for everyday life.",
@@ -27,32 +35,36 @@ const DEAL_ENDS = new Date("2026/12/31T23:59:59");
  * Each banner sits on its own row of a 12-column grid, and the middle one is
  * mirrored (image left, text right). Order is expressed here because the two
  * halves swap places per position.
+ *
+ * Every class is `lg:`-prefixed on purpose: below 992px the whole 12-column
+ * placement is dropped for a plain 2-up card grid (see Banner), so none of
+ * these overrides leak into the mobile layout.
  */
 const BANNER_POSITION = {
   "top-right": {
-    card: "col-start-5 col-end-13 row-start-1 justify-start",
-    image: "order-2",
-    content: "order-1",
+    card: "lg:col-start-5 lg:col-end-13 lg:row-start-1 lg:justify-start",
+    image: "lg:order-2",
+    content: "lg:order-1",
   },
   "middle-left": {
-    card: "col-start-1 col-end-9 row-start-2 justify-end max-[450px]:items-end",
-    image: "order-1",
-    content: "order-2",
+    card: "lg:col-start-1 lg:col-end-9 lg:row-start-2 lg:justify-end",
+    image: "lg:order-1",
+    content: "lg:order-2",
   },
   "bottom-right": {
-    card: "col-start-6 col-end-13 row-start-3 justify-start",
-    image: "order-2",
-    content: "order-1",
+    card: "lg:col-start-6 lg:col-end-13 lg:row-start-3 lg:justify-start",
+    image: "lg:order-2",
+    content: "lg:order-1",
   },
   "lower-left": {
-    card: "col-start-1 col-end-9 row-start-4 justify-end max-[450px]:items-end",
-    image: "order-1",
-    content: "order-2",
+    card: "lg:col-start-1 lg:col-end-9 lg:row-start-4 lg:justify-end",
+    image: "lg:order-1",
+    content: "lg:order-2",
   },
   "lowest-right": {
-    card: "col-start-6 col-end-13 row-start-5 justify-start",
-    image: "order-2",
-    content: "order-1",
+    card: "lg:col-start-6 lg:col-end-13 lg:row-start-5 lg:justify-start",
+    image: "lg:order-2",
+    content: "lg:order-1",
   },
 };
 
@@ -103,25 +115,33 @@ function Hero() {
         <div className="container">
           <div className="md:w-2/3 lg:w-7/12 xl:w-5/12">
             {/* 80px top on desktop, 40px + 30px left on tablet, 100px/20px on
-                mobile — three separate padding rules, so three overrides. */}
+                mobile — three separate padding rules, so three overrides.
+                Every word here sits on the photo, so all three blocks take the
+                slide's own legible grey instead of theme colours that only
+                work against a single background. */}
             <div className="relative z-[2] pt-20 max-lg:pt-10 max-lg:pl-[30px] max-md:px-5 max-md:pt-[100px]">
-              <h6 className="mb-5 text-[14px] font-bold tracking-[3px] text-primary uppercase max-md:text-[12px] max-md:tracking-[2px]">
+              <h6 className={`mb-5 text-[14px] font-bold tracking-[3px] uppercase max-md:text-[12px] max-md:tracking-[2px] ${slide.tone}`}>
                 {slide.kicker}
               </h6>
 
-              <h2 className="mb-[25px] text-[48px] leading-[1.2] font-bold text-ink max-lg:text-[40px] max-md:text-[32px]">
+              {/* The hero's largest word, sharing the CTA's navy so the two read as one
+                  block against the photo. */}
+              <h2 className="mb-[25px] text-[48px] leading-[1.2] font-bold text-primary max-lg:text-[40px] max-md:text-[32px]">
                 {slide.title}
               </h2>
 
-              <p className="mb-[30px] max-w-[480px] text-[15px] leading-[1.8] text-[#3d3d3d] max-md:max-w-[350px] max-md:text-[14px]">
+              {/* Bottom line of the hero block. Red rather than the slide's
+                  grey, so it reads as the supporting detail next to the CTA. */}
+              <p className="mb-[30px] max-w-[480px] text-[15px] leading-[1.8] text-shadow-primary shadow-amber-50 max-md:max-w-[350px] max-md:text-[14px]">
                 {slide.copy}
               </p>
 
               {/* .primary-btn, with the hero's 2px tracking and 10px arrow gap;
-                  the component itself is 4px. */}
+                  the component itself is 4px. Background is the navy
+                  secondary so the hero CTA is not the black default. */}
               <Link
                 to="/shop"
-                className="primary-btn inline-flex items-center gap-2.5 tracking-[2px]"
+                className="primary-btn inline-flex items-center gap-2.5 bg-secondary tracking-[2px] hover:bg-primary"
               >
                 EXPLORE COLLECTION
                 <ArrowRight size={20} aria-hidden="true" />
@@ -197,19 +217,34 @@ function Banner() {
   ];
 
   return (
-    <section className="bg-white py-spad max-lg:py-[70px] max-[600px]:py-[50px]">
+    // Hidden below `lg`: the staggered 12-column layout needs the width, and
+    // on phones this section just repeated the product grid underneath it.
+    <section className="hidden bg-white py-spad lg:block max-[600px]:py-[50px]">
       <div className="container">
-        <div className="grid grid-cols-12 grid-rows-[repeat(5,180px)] items-center gap-x-[45px] max-lg:grid-cols-1 max-lg:grid-rows-none max-lg:gap-[45px]">
+        {/*
+          Two layouts, one set of markup.
+
+          Below `lg` the staggered 12-column placement is meaningless, so the
+          grid collapses to the same column counts and image height as
+          ProductCard below it (1-up on phones, 2-up from `sm`, 260px tall) —
+          that is what makes a banner photo line up with the product photo
+          sitting under it. Each card stacks image-over-text and centres both,
+          so no card depends on where it landed in the sequence.
+
+          From `lg` the card turns horizontal again and BANNER_POSITION takes
+          over the placement and half-order.
+        */}
+        <div className="grid grid-cols-1 items-start gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-12 lg:grid-rows-[repeat(5,180px)] lg:items-center lg:gap-x-[45px] lg:gap-y-0">
           {cards.map((card) => {
             const position = BANNER_POSITION[card.position];
 
             return (
               <div
                 key={card.image}
-                className={`group relative flex items-center gap-[28px] max-lg:col-auto max-lg:row-auto max-lg:justify-center max-lg:gap-[18px] max-[450px]:flex-col max-[450px]:items-start ${position.card}`}
+                className={`group relative flex flex-col items-center text-center lg:flex-row lg:items-center lg:gap-[28px] lg:text-left ${position.card}`}
               >
                 <div
-                  className={`h-[210px] w-[270px] shrink-0 overflow-hidden bg-surface max-lg:h-[220px] max-lg:w-[280px] max-[600px]:h-[160px] max-[600px]:w-[190px] max-[450px]:h-[220px] max-[450px]:w-full ${position.image}`}
+                  className={`h-[260px] w-full shrink-0 overflow-hidden bg-surface sm:h-[260px] lg:h-[210px] lg:w-[270px] ${position.image}`}
                 >
                   <img
                     src={card.image}
@@ -218,16 +253,14 @@ function Banner() {
                   />
                 </div>
 
-                <div
-                  className={`min-w-[170px] max-[600px]:min-w-[120px] ${position.content}`}
-                >
-                  <h2 className="text-[25px] leading-[1.25] font-bold text-ink max-lg:text-[22px] max-[600px]:text-[18px]">
+                <div className={`mt-4 lg:mt-0 lg:min-w-[170px] ${position.content}`}>
+                  <h2 className="text-[20px] leading-[1.25] font-bold text-ink sm:text-[22px] lg:text-[25px]">
                     {card.title}
                   </h2>
 
                   <Link
                     to="/shop"
-                    className="mt-[14px] inline-block border-b-2 border-ink pb-[5px] text-[11px] leading-none font-bold tracking-[1.5px] text-ink uppercase transition-all duration-300 hover:border-primary hover:text-primary max-[600px]:text-[9px]"
+                    className="mt-[14px] inline-block border-b-2 border-ink pb-[5px] text-[10px] leading-none font-bold tracking-[1.5px] text-ink uppercase transition-all duration-300 hover:border-primary hover:text-primary lg:text-[11px]"
                   >
                     Shop now
                   </Link>
@@ -247,8 +280,9 @@ function ProductSection() {
 
   return (
     // Original `.product` overrode `.spad`: padding-top 0, padding-bottom 60px,
-    // because the filter row sits directly under the banner.
-    <section className="pb-[60px]">
+    // because the filter row sat directly under the banner. The banner is gone
+    // below `lg`, so this section now needs its own top space there.
+    <section className="pt-[50px] pb-[60px] lg:pt-0">
       <div className="container">
         {/* .filter__controls: 24px/700 uppercase, 88px gaps, 45px bottom. */}
         <ul className="mb-[45px] flex flex-wrap justify-center gap-x-[88px]">
