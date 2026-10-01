@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Phone, MapPin } from "lucide-react";
 
 const OFFICES = [
-  { name: "Mumbai", lines: ["195 Bandra West, Mumbai 400 050", "+91 98200 31409"] },
-  { name: "Bengaluru", lines: ["109 MG Road, Bengaluru 560 001", "+91 98450 42398"] },
+  { name: "Punjab", lines: ["Hoshiarpur / Hariana"] },
+ 
 ];
 
 export default function Contact() {
@@ -45,7 +45,7 @@ export default function Contact() {
                   <Phone size={20} className="mt-1 shrink-0 text-primary" />
                   <div>
                     <h4 className="text-ink">Phone</h4>
-                    <p className="text-sm">+91 98200 31409</p>
+                    <p className="text-sm">+91 98200 00000</p>
                   </div>
                 </li>
               </ul>
