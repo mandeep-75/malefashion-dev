@@ -31,43 +31,6 @@ const HERO_SLIDES = [
 /** Deal countdown target. Set a real promo date, or remove the widget. */
 const DEAL_ENDS = new Date("2026/12/31T23:59:59");
 
-/**
- * Each banner sits on its own row of a 12-column grid, and the middle one is
- * mirrored (image left, text right). Order is expressed here because the two
- * halves swap places per position.
- *
- * Every class is `lg:`-prefixed on purpose: below 992px the whole 12-column
- * placement is dropped for a plain 2-up card grid (see Banner), so none of
- * these overrides leak into the mobile layout.
- */
-const BANNER_POSITION = {
-  "top-right": {
-    card: "lg:col-start-5 lg:col-end-13 lg:row-start-1 lg:justify-start",
-    image: "lg:order-2",
-    content: "lg:order-1",
-  },
-  "middle-left": {
-    card: "lg:col-start-1 lg:col-end-9 lg:row-start-2 lg:justify-end",
-    image: "lg:order-1",
-    content: "lg:order-2",
-  },
-  "bottom-right": {
-    card: "lg:col-start-6 lg:col-end-13 lg:row-start-3 lg:justify-start",
-    image: "lg:order-2",
-    content: "lg:order-1",
-  },
-  "lower-left": {
-    card: "lg:col-start-1 lg:col-end-9 lg:row-start-4 lg:justify-end",
-    image: "lg:order-1",
-    content: "lg:order-2",
-  },
-  "lowest-right": {
-    card: "lg:col-start-6 lg:col-end-13 lg:row-start-5 lg:justify-start",
-    image: "lg:order-2",
-    content: "lg:order-1",
-  },
-};
-
 function useCountdown(target) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -187,87 +150,66 @@ function Hero() {
   );
 }
 
-function Banner() {
-  const cards = [
-    {
-      image: "/img/product/product-1.jpg",
-      title: "Black",
-      position: "top-right",
-    },
-    {
-      image: "/img/product/product-2.jpg",
-      title: "White",
-      position: "middle-left",
-    },
-    {
-      image: "/img/product/product-3.jpg",
-      title: "Blue",
-      position: "bottom-right",
-    },
-    {
-      image: "/img/product/product-4.jpg",
-      title: "Maroon",
-      position: "lower-left",
-    },
-    {
-      image: "/img/product/product-5.jpg",
-      title: "Red / White Sleeves",
-      position: "lowest-right",
-    },
-  ];
-
+/**
+ * Brand block that took over the banner slot between the hero and the product
+ * grid.
+ *
+ * Two equal columns from `md`, `items-center` so the image sits on the copy's
+ * optical midpoint instead of the top edge, and a gap that widens with the
+ * viewport rather than a fixed margin — so the two halves stay one composition
+ * at every width instead of drifting apart.
+ */
+function About() {
   return (
-    // Hidden below `lg`: the staggered 12-column layout needs the width, and
-    // on phones this section just repeated the product grid underneath it.
-    <section className="hidden bg-white py-spad lg:block max-[600px]:py-[50px]">
+    <section className="spad bg-white">
       <div className="container">
-        {/*
-          Two layouts, one set of markup.
+        <div className="grid items-center gap-10 md:grid-cols-2 md:gap-[60px] lg:gap-[90px]">
+          {/* max-w is mobile-only: the container is already 1140px wide from
+              992px, so without it the copy would stretch to a ~1100px measure in
+              the 992px+ band before the two-column grid is worth splitting. */}
+          <div className="max-w-[620px] md:max-w-none">
+            {/* .section-title is not reused because it centres its own block,
+                which is wrong for a half-width column. Same measurements, left
+                aligned. */}
+            <span className="block text-[14px] leading-none font-bold tracking-[2px] text-primary uppercase">
+              About Male Fashion
+            </span>
 
-          Below `lg` the staggered 12-column placement is meaningless, so the
-          grid collapses to the same column counts and image height as
-          ProductCard below it (1-up on phones, 2-up from `sm`, 260px tall) —
-          that is what makes a banner photo line up with the product photo
-          sitting under it. Each card stacks image-over-text and centres both,
-          so no card depends on where it landed in the sequence.
+            {/* Mobile-first steps rather than the old max-* chain: the two-column grid
+                starts at `md`, so the heading needs to shrink in step with the
+                column it sits in, not only at the `md`/`lg` boundaries. */}
+            <h2 className="mt-[15px] text-[30px] leading-[1.15] font-bold text-ink md:text-[34px] lg:text-[40px] xl:text-[46px]">
+              Everyday menswear,{" "}
+              <span className="text-primary">made close to home.</span>
+            </h2>
 
-          From `lg` the card turns horizontal again and BANNER_POSITION takes
-          over the placement and half-order.
-        */}
-        <div className="grid grid-cols-1 items-start gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-12 lg:grid-rows-[repeat(5,180px)] lg:items-center lg:gap-x-[45px] lg:gap-y-0">
-          {cards.map((card) => {
-            const position = BANNER_POSITION[card.position];
+            <p className="mt-[25px] text-[16px] leading-[1.8] text-body max-md:text-[15px]">
+              Male Fashion is a small Indian menswear label built on a simple
+              idea — the everyday shirt, tee and overshirt should be the last
+              thing worth thinking about. We design in Mumbai, cut in short runs
+              from mills we have worked with for years, and price honestly in
+              rupees, with no distributor in between. Our two studios in Bandra
+              West and MG Road in Bengaluru handle fittings, alterations and
+              returns for the people who actually wear the clothes.
+            </p>
 
-            return (
-              <div
-                key={card.image}
-                className={`group relative flex flex-col items-center text-center lg:flex-row lg:items-center lg:gap-[28px] lg:text-left ${position.card}`}
-              >
-                <div
-                  className={`h-[260px] w-full shrink-0 overflow-hidden bg-surface sm:h-[260px] lg:h-[210px] lg:w-[270px] ${position.image}`}
-                >
-                  <img
-                    src={card.image}
-                    alt={card.title}
-                    className="block h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                </div>
+            {/* No colour override, so the CTA uses .primary-btn's own black
+                default and stays distinct from the hero's navy one. */}
+            <Link to="/about" className="primary-btn mt-[35px]">
+              Our Story
+            </Link>
+          </div>
 
-                <div className={`mt-4 lg:mt-0 lg:min-w-[170px] ${position.content}`}>
-                  <h2 className="text-[20px] leading-[1.25] font-bold text-ink sm:text-[22px] lg:text-[25px]">
-                    {card.title}
-                  </h2>
-
-                  <Link
-                    to="/shop"
-                    className="mt-[14px] inline-block border-b-2 border-ink pb-[5px] text-[10px] leading-none font-bold tracking-[1.5px] text-ink uppercase transition-all duration-300 hover:border-primary hover:text-primary lg:text-[11px]"
-                  >
-                    Shop now
-                  </Link>
-                </div>
-              </div>
-            );
-          })}
+          {/* Spans one of the two columns outright — an earlier version pinned
+              this with `col-start-7` and no span, which grid resolves to a
+              single column and left the rest of the row empty. */}
+          <div className="min-w-0">
+            <img
+              src="/img/logo/logo.PNG"
+              alt="Male Fashion collection"
+              className="h-auto w-full object-cover"
+            />
+          </div>
         </div>
       </div>
     </section>
@@ -280,8 +222,9 @@ function ProductSection() {
 
   return (
     // Original `.product` overrode `.spad`: padding-top 0, padding-bottom 60px,
-    // because the filter row sat directly under the banner. The banner is gone
-    // below `lg`, so this section now needs its own top space there.
+    // because the filter row sat directly under the block above. That block
+    // still owns the top space, so the mobile padding here is only holding the
+    // filter row clear of the About copy.
     <section className="pt-[50px] pb-[60px] lg:pt-0">
       <div className="container">
         {/* .filter__controls: 24px/700 uppercase, 88px gaps, 45px bottom. */}
@@ -418,7 +361,7 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <Banner />
+      <About />
       <ProductSection />
     </>
   );

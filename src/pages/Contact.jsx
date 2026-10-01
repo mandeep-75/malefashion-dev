@@ -1,17 +1,48 @@
-import { useState } from "react";
-import { Phone, MapPin } from "lucide-react";
+import { MapPin, Phone } from "lucide-react";
 
 const OFFICES = [
   { name: "Punjab", lines: ["Hoshiarpur / Hariana"] },
- 
 ];
 
+const isEmail = (line) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(line.trim());
+const isPhone = (line) => /^[+\d][\d\s()+-]{6,}$/.test(line.trim());
+
+/**
+ * Each office line is linked automatically when it looks like a phone number or
+ * an email, so a studio can list whatever it has without the markup changing.
+ * Addresses fall through as plain text.
+ */
+function OfficeLine({ line }) {
+  if (isEmail(line)) {
+    return (
+      <a href={`mailto:${line.trim()}`} className="transition-colors hover:text-primary">
+        {line}
+      </a>
+    );
+  }
+
+  if (isPhone(line)) {
+    return (
+      <a
+        href={`tel:${line.replace(/[^\d+]/g, "")}`}
+        className="transition-colors hover:text-primary"
+      >
+        {line}
+      </a>
+    );
+  }
+
+  return line;
+}
+
+/** Pre-filled mailto. Change the address to wherever enquiries should land. */
+const MAILTO =
+  "mailto:malefashion.in@gmail.com?subject=" +
+  encodeURIComponent("Enquiry from the website") +
+  "&body=" +
+  encodeURIComponent("Hi,\n\n");
+
 export default function Contact() {
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
-  const [sent, setSent] = useState(false);
-
-  const set = (key) => (event) => setForm((prev) => ({ ...prev, [key]: event.target.value }));
-
   return (
     <>
       <section className="spad">
@@ -35,7 +66,7 @@ export default function Contact() {
                       <h4 className="text-ink">{office.name}</h4>
                       {office.lines.map((line) => (
                         <p key={line} className="text-sm">
-                          {line}
+                          <OfficeLine line={line} />
                         </p>
                       ))}
                     </div>
@@ -51,77 +82,23 @@ export default function Contact() {
               </ul>
             </div>
 
-            <div>
-              {sent ? (
-                <div className="border border-hairline p-8 text-center">
-                  <h3 className="font-display text-xl text-ink">Message sent</h3>
-                  <p className="mt-2">Thanks {form.name.split(" ")[0]} — we&apos;ll be in touch shortly.</p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSent(false);
-                      setForm({ name: "", email: "", message: "" });
-                    }}
-                    className="primary-btn mt-6"
+            {/* No server to post to, so there is no form to submit — a `mailto:`
+                handoff hands the whole conversation to the visitor's own mail
+                client, which is where the reply gets sent from anyway. */}
+                <div>
+                  <h3 className="font-display text-xl text-ink">Send us a message</h3>
+                  <p className="mt-2 text-sm">
+                    Opens your mail app with the address already filled in. Write
+                    what you need there and send — we read everything.
+                  </p>
+
+                  <a
+                    href={MAILTO}
+                    className="site-btn mt-6 inline-block"
                   >
-                    Send another
-                  </button>
-                </div>
-              ) : (
-                <form
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    setSent(true);
-                  }}
-                  className="space-y-4"
-                >
-                  <div>
-                    <label htmlFor="contact-name" className="sr-only">
-                      Name
-                    </label>
-                    <input
-                      id="contact-name"
-                      required
-                      value={form.name}
-                      onChange={set("name")}
-                      placeholder="Name"
-                      className="w-full border border-hairline-2 px-4 py-3.5 text-sm focus:border-primary focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="contact-email" className="sr-only">
-                      Email
-                    </label>
-                    <input
-                      id="contact-email"
-                      type="email"
-                      required
-                      value={form.email}
-                      onChange={set("email")}
-                      placeholder="Email"
-                      className="w-full border border-hairline-2 px-4 py-3.5 text-sm focus:border-primary focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="contact-message" className="sr-only">
-                      Message
-                    </label>
-                    <textarea
-                      id="contact-message"
-                      required
-                      rows={6}
-                      value={form.message}
-                      onChange={set("message")}
-                      placeholder="Message"
-                      className="w-full resize-y border border-hairline-2 px-4 py-3.5 text-sm focus:border-primary focus:outline-none"
-                    />
-                  </div>
-                  <button type="submit" className="site-btn w-full sm:w-auto">
                     Send Message
-                  </button>
-                </form>
-              )}
-            </div>
+                  </a>
+                </div>
           </div>
         </div>
       </section>

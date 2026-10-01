@@ -5,6 +5,7 @@ import Footer from "./components/Footer";
 import FloatingCartButton from "./components/FloatingCartButton";
 import SearchModal from "./components/SearchModal";
 import Home from "./pages/Home";
+import Returns from "./pages/Returns";
 import Shop from "./pages/Shop";
 import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/returns" element={<Returns />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="*" element={<NotFound />} />
