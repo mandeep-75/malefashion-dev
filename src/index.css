@@ -1,0 +1,228 @@
+@import "tailwindcss";
+
+/*
+  Design tokens, type scale and spacing, carried over 1:1 from the design this
+  app was rebuilt from.
+
+  Note on fonts: the original `h1`-`h6` rules set `font-family: 'Nunito Sans'`
+  and a second display face was declared but never referenced by any selector.
+  So the whole site is Nunito Sans, and --font-display is an alias for it
+  rather than a second typeface. Both class names work in JSX.
+*/
+@theme {
+  --color-primary: #e53637;
+  --color-primary-dark: #c62c2d;
+  --color-secondary: #0c2b4b;
+
+  --color-ink: #111111;
+  --color-ink-2: #323232;
+  --color-body: #5c5c5c;
+  --color-normal: #1c1c1c;
+
+  --color-surface: #f5f5f5;
+  --color-surface-2: #f2f2f2;
+  --color-hairline: #ebebeb;
+  --color-hairline-2: #e1e1e1;
+
+  --color-rating: #f7941d;
+  --color-muted: #b7b7b7;
+
+  --font-sans: "Nunito Sans", system-ui, -apple-system, sans-serif;
+  --font-display: "Nunito Sans", system-ui, -apple-system, sans-serif;
+
+  /* Original section rhythm: .spad is a flat 100px and is NOT reduced on
+     small screens, so these are the only two spacing steps in the design. */
+  --spacing-spad: 100px;
+  --spacing-section-gap: 45px;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    height: 100%;
+    font-family: var(--font-sans);
+    color: var(--color-body);
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Original scale: h1 70 / h2 36 / h3 30 / h4 24 / h5 18 / h6 16, weight 400. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-weight: 400;
+    color: #111111;
+  }
+
+  h1 {
+    font-size: 70px;
+  }
+
+  h2 {
+    font-size: 36px;
+  }
+
+  h3 {
+    font-size: 30px;
+  }
+
+  h4 {
+    font-size: 24px;
+  }
+
+  h5 {
+    font-size: 18px;
+  }
+
+  h6 {
+    font-size: 16px;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  /*
+    NOTE: the container ladder deliberately lives *outside* @layer at the
+    bottom of this file. JSX uses class="container", and Tailwind v4 also
+    ships a `container` utility with its own ladder (xl = 1280px) that would
+    otherwise win from @layer utilities.
+  */
+}
+
+@layer components {
+  .spad {
+    padding-block: 100px;
+  }
+
+  /* .primary-btn: 13px / 700 / uppercase / 14px 30px / #000 / ls 4px. */
+  .primary-btn {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 14px 30px;
+    color: #fff;
+    background: #000;
+    letter-spacing: 4px;
+    border: 0;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .primary-btn:hover {
+    background: var(--color-primary);
+    color: #fff;
+  }
+
+  .primary-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* .site-btn: 14px / 700 / uppercase / 14px 30px / heading colour. */
+  .site-btn {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 14px 30px;
+    color: #fff;
+    background: var(--color-ink);
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .site-btn:hover {
+    background: var(--color-primary);
+  }
+
+  .site-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* .section-title: 45px bottom gap, 14px/2px eyebrow, 46px heading leading. */
+  .section-title {
+    text-align: center;
+    margin-bottom: 45px;
+  }
+
+  .section-title span {
+    display: block;
+    color: var(--color-primary);
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+  }
+
+  .section-title h2 {
+    color: var(--color-ink);
+    font-weight: 700;
+    line-height: 46px;
+  }
+
+  /* Background images are applied with inline style, so no JS scan is needed. */
+  .set-bg {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Classic container ladder: 1170 / 1140 / 960 / 540 with 15px gutters.
+   Unlayered on purpose (see above).
+--------------------------------------------------------------------------- */
+.container {
+  width: 100%;
+  padding-inline: 15px;
+  margin-inline: auto;
+}
+
+@media (min-width: 576px) {
+  .container {
+    max-width: 540px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 960px;
+  }
+}
+
+@media (min-width: 992px) {
+  .container {
+    max-width: 1140px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1170px;
+  }
+}
