@@ -7,13 +7,13 @@ import { CATEGORIES, productsInCategory } from "../data/products";
 
 const HERO_SLIDES = [
   {
-    image: "/img/hero/hero-1.jpg",
+    image: "/img/hero/hero-1.png",
     kicker: "THE NEW SEASON",
     title: "Timeless Style. Modern Essentials.",
     copy: "Thoughtfully designed menswear made for every season, every occasion, and every day.",
   },
   {
-    image: "/img/hero/hero-2.jpg",
+    image: "/img/hero/hero-2.png",
     kicker: "New Arrivals",
     title: "Made for Modern Men.",
     copy: "Clean silhouettes, premium details and timeless pieces built for everyday life.",
