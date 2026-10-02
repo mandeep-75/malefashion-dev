@@ -21,10 +21,17 @@ const HERO_SLIDES = [
   },
   {
     image: "/img/hero/hero-2.png",
+    tone: "text-legible",
+    kicker: "THE LATEST EDIT",
+    title: "Timeless Style. Modern Essentials.",
+    copy: "Thoughtfully designed menswear made for every season, every occasion, and every day.",
+  },
+  {
+    image: "/img/hero/hero-3.png",
     tone: "text-legible-2",
     kicker: "New Arrivals",
-    title: "Made for Modern Men.",
-    copy: "Clean silhouettes, premium details and timeless pieces built for everyday life.",
+    title: "Style That Speaks for You.",
+    copy: "Timeless silhouettes crafted for confidence, comfort, and everyday sophistication.",
   },
 ];
 
