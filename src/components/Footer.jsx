@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { Heart, Camera } from "lucide-react";
+import { Heart } from "lucide-react";
+import InstagramIcon from "./InstagramIcon";
 import { INSTAGRAM_URL } from "../lib/brand";
 
 // Resolved once at module load, not on every render.
@@ -81,14 +82,14 @@ export default function Footer() {
           {/* The only social link on the site, so it gets the whole left of the
               footer bar as a standalone mark rather than sitting in a list under
               the logo where it read as another footer link. Lucide carries no
-              brand marks, hence the wordmark. */}
+              brand marks, hence the bundled Instagram glyph. */}
           <a
             href={INSTAGRAM_URL}
             target="_blank"
             rel="noreferrer"
             className="inline-flex shrink-0 items-center gap-2.5 text-sm font-bold tracking-[2px] text-white uppercase transition-colors hover:text-primary"
           >
-            <Camera size={20} strokeWidth={1.5} aria-hidden="true" />
+            <InstagramIcon size={20} />
             Instagram
           </a>
 
